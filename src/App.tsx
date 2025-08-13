@@ -1,180 +1,115 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Key, Activity, LogOut, Settings, Search } from 'lucide-react';
-import Login from './components/Login';
+import AuthForm from './components/AuthForm';
 import Dashboard from './components/Dashboard';
 import EmployeeManagement from './components/EmployeeManagement';
 import KeyManagement from './components/KeyManagement';
 import TransactionOverview from './components/TransactionOverview';
 import EmployeeDetail from './components/EmployeeDetail';
-import { Employee, KeyItem, Transaction } from './types';
+import { useAuth } from './hooks/useAuth';
+import { useDatabase } from './hooks/useDatabase';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<string>('');
+  const { user, loading: authLoading, signIn, signUp, signOut } = useAuth();
+  const {
+    employees,
+    keys,
+    transactions,
+    loading: dbLoading,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee,
+    addKey,
+    updateKey,
+    deleteKey,
+    issueKey,
+    returnKey,
+  } = useDatabase();
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: '1',
-      name: 'Jan Janssen',
-      employeeNumber: 'EMP001',
-      type: 'CAO',
-      startDate: '2020-01-15',
-      yearsOfService: 4,
-    },
-    {
-      id: '2',
-      name: 'Maria van den Berg',
-      employeeNumber: 'EMP002',
-      type: 'MBV',
-      startDate: '2019-06-10',
-      yearsOfService: 5,
-    },
-    {
-      id: '3',
-      name: 'Pieter de Vries',
-      employeeNumber: 'EMP003',
-      type: 'CAO',
-      startDate: '2022-03-20',
-      yearsOfService: 2,
-    },
-  ]);
 
-  const [keys, setKeys] = useState<KeyItem[]>([
-    {
-      id: '1',
-      keyNumber: 'A001',
-      type: 'A',
-      length: 'kort',
-      status: 'available',
-      opmerking: 'Hoofdingang',
-    },
-    {
-      id: '2',
-      keyNumber: 'B001',
-      type: 'B',
-      length: 'lang',
-      status: 'issued',
-      assignedTo: '1',
-      opmerking: 'Kantoor verdieping 2',
-    },
-    {
-      id: '3',
-      keyNumber: 'C001',
-      type: 'C',
-      length: 'kort',
-      status: 'available',
-      opmerking: 'Magazijn',
-    },
-  ]);
-
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: '1',
-      employeeId: '1',
-      keyId: '2',
-      action: 'issue',
-      timestamp: new Date('2024-01-15T09:30:00'),
-      notes: 'Nieuwe medewerker onboarding',
-    },
-    {
-      id: '2',
-      employeeId: '2',
-      keyId: '1',
-      action: 'return',
-      timestamp: new Date('2024-01-14T16:45:00'),
-      notes: 'Einde dienst',
-    },
-  ]);
-
-  useEffect(() => {
-    // Calculate years of service on component mount and periodically
-    const updateYearsOfService = () => {
-      setEmployees(prevEmployees =>
-        prevEmployees.map(employee => ({
-          ...employee,
-          yearsOfService: new Date().getFullYear() - new Date(employee.startDate).getFullYear(),
-        }))
-      );
-    };
-    updateYearsOfService();
-  }, []);
-
-  const handleLogin = (username: string) => {
-    setIsAuthenticated(true);
-    setCurrentUser(username);
+  const handleSignIn = async (email: string, password: string) => {
+    const { error } = await signIn(email, password);
+    if (error) throw error;
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentUser('');
+  const handleSignUp = async (email: string, password: string, fullName: string) => {
+    const { error } = await signUp(email, password, fullName);
+    if (error) throw error;
+  };
+
+  const handleLogout = async () => {
+    await signOut();
     setActiveTab('dashboard');
   };
 
-  const addEmployee = (employee: Omit<Employee, 'id' | 'yearsOfService'>) => {
-    const newEmployee: Employee = {
-      ...employee,
-      id: Date.now().toString(),
-      yearsOfService: new Date().getFullYear() - new Date(employee.startDate).getFullYear(),
-    };
-    setEmployees([...employees, newEmployee]);
+  const handleAddEmployee = async (employee: any) => {
+    try {
+      await addEmployee(employee);
+    } catch (error) {
+      console.error('Error adding employee:', error);
+    }
   };
 
-  const updateEmployee = (id: string, updatedEmployee: Omit<Employee, 'id' | 'yearsOfService'>) => {
-    setEmployees(employees.map(emp => 
-      emp.id === id 
-        ? {
-            ...updatedEmployee,
-            id,
-            yearsOfService: new Date().getFullYear() - new Date(updatedEmployee.startDate).getFullYear(),
-          }
-        : emp
-    ));
+  const handleUpdateEmployee = async (id: string, employee: any) => {
+    try {
+      await updateEmployee(id, employee);
+    } catch (error) {
+      console.error('Error updating employee:', error);
+    }
   };
 
-  const deleteEmployee = (id: string) => {
-    setEmployees(employees.filter(emp => emp.id !== id));
-    // Also return all keys assigned to this employee
-    setKeys(keys.map(key => 
-      key.assignedTo === id 
-        ? { ...key, status: 'available', assignedTo: undefined }
-        : key
-    ));
+  const handleDeleteEmployee = async (id: string) => {
+    try {
+      await deleteEmployee(id);
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+    }
   };
 
-  const addKey = (key: Omit<KeyItem, 'id' | 'status'>) => {
-    const newKey: KeyItem = {
-      ...key,
-      id: Date.now().toString(),
-      status: 'available',
-    };
-    setKeys([...keys, newKey]);
+  const handleAddKey = async (key: any) => {
+    try {
+      await addKey(key);
+    } catch (error) {
+      console.error('Error adding key:', error);
+    }
   };
 
-  const updateKey = (id: string, updatedKey: Omit<KeyItem, 'id'>) => {
-    setKeys(keys.map(key => key.id === id ? { ...updatedKey, id } : key));
+  const handleUpdateKey = async (id: string, key: any) => {
+    try {
+      await updateKey(id, key);
+    } catch (error) {
+      console.error('Error updating key:', error);
+    }
   };
 
-  const deleteKey = (id: string) => {
-    setKeys(keys.filter(key => key.id !== id));
+  const handleDeleteKey = async (id: string) => {
+    try {
+      await deleteKey(id);
+    } catch (error) {
+      console.error('Error deleting key:', error);
+    }
   };
 
-  const issueKey = (keyId: string, employeeId: string, notes?: string) => {
-    setKeys(keys.map(key => 
-      key.id === keyId 
-        ? { ...key, status: 'issued', assignedTo: employeeId }
-        : key
-    ));
+  const handleIssueKey = async (keyId: string, employeeId: string, notes?: string) => {
+    try {
+      if (user) {
+        await issueKey(keyId, employeeId, user.email || user.id, notes);
+      }
+    } catch (error) {
+      console.error('Error issuing key:', error);
+    }
+  };
 
-    const newTransaction: Transaction = {
-      id: Date.now().toString(),
-      employeeId,
-      keyId,
-      action: 'issue',
-      timestamp: new Date(),
-      notes,
-    };
-    setTransactions([newTransaction, ...transactions]);
+  const handleReturnKey = async (keyId: string, notes?: string) => {
+    try {
+      if (user) {
+        await returnKey(keyId, user.email || user.id, notes);
+      }
+    } catch (error) {
+      console.error('Error returning key:', error);
+    }
   };
 
   const handleViewEmployeeHistory = (employeeId: string) => {
@@ -187,29 +122,19 @@ function App() {
     setActiveTab('employees');
   };
 
-  const returnKey = (keyId: string, notes?: string) => {
-    const key = keys.find(k => k.id === keyId);
-    if (key && key.assignedTo) {
-      setKeys(keys.map(k => 
-        k.id === keyId 
-          ? { ...k, status: 'available', assignedTo: undefined }
-          : k
-      ));
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Laden...</p>
+        </div>
+      </div>
+    );
+  }
 
-      const newTransaction: Transaction = {
-        id: Date.now().toString(),
-        employeeId: key.assignedTo,
-        keyId,
-        action: 'return',
-        timestamp: new Date(),
-        notes,
-      };
-      setTransactions([newTransaction, ...transactions]);
-    }
-  };
-
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
+  if (!user) {
+    return <AuthForm onSignIn={handleSignIn} onSignUp={handleSignUp} />;
   }
 
   return (
@@ -224,11 +149,16 @@ function App() {
               </div>
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-gray-900">EBS Key Management</h1>
-                <p className="text-sm text-gray-500">Welkom, {currentUser}</p>
+                <p className="text-sm text-gray-500">
+                  Welkom, {user.user_metadata?.full_name || user.email}
+                </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-4">
+              <div className="text-xs text-gray-500">
+                {user.email}
+              </div>
               <button
                 onClick={handleLogout}
                 className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -273,49 +203,58 @@ function App() {
         {/* Main Content */}
         <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
-            {activeTab === 'dashboard' && (
-              <Dashboard 
-                employees={employees} 
-                keys={keys} 
-                transactions={transactions} 
-                onAddKey={() => setActiveTab('keys')}
-                onIssueKey={() => setActiveTab('keys')}
-              />
-            )}
-            {activeTab === 'employees' && (
-              <EmployeeManagement
-                employees={employees}
-                onAddEmployee={addEmployee}
-                onUpdateEmployee={updateEmployee}
-                onDeleteEmployee={deleteEmployee}
-                onViewHistory={handleViewEmployeeHistory}
-              />
-            )}
-            {activeTab === 'employee-detail' && selectedEmployeeId && (
-              <EmployeeDetail
-                employee={employees.find(emp => emp.id === selectedEmployeeId)!}
-                transactions={transactions.filter(t => t.employeeId === selectedEmployeeId)}
-                keys={keys}
-                onBack={handleBackToEmployees}
-              />
-            )}
-            {activeTab === 'keys' && (
-              <KeyManagement
-                keys={keys}
-                employees={employees}
-                onAddKey={addKey}
-                onUpdateKey={updateKey}
-                onDeleteKey={deleteKey}
-                onIssueKey={issueKey}
-                onReturnKey={returnKey}
-              />
-            )}
-            {activeTab === 'transactions' && (
-              <TransactionOverview
-                transactions={transactions}
-                employees={employees}
-                keys={keys}
-              />
+            {dbLoading ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600">Gegevens laden...</p>
+              </div>
+            ) : (
+              <>
+                {activeTab === 'dashboard' && (
+                  <Dashboard 
+                    employees={employees} 
+                    keys={keys} 
+                    transactions={transactions} 
+                    onAddKey={() => setActiveTab('keys')}
+                    onIssueKey={() => setActiveTab('keys')}
+                  />
+                )}
+                {activeTab === 'employees' && (
+                  <EmployeeManagement
+                    employees={employees}
+                    onAddEmployee={handleAddEmployee}
+                    onUpdateEmployee={handleUpdateEmployee}
+                    onDeleteEmployee={handleDeleteEmployee}
+                    onViewHistory={handleViewEmployeeHistory}
+                  />
+                )}
+                {activeTab === 'employee-detail' && selectedEmployeeId && (
+                  <EmployeeDetail
+                    employee={employees.find(emp => emp.id === selectedEmployeeId)!}
+                    transactions={transactions.filter(t => t.employeeId === selectedEmployeeId)}
+                    keys={keys}
+                    onBack={handleBackToEmployees}
+                  />
+                )}
+                {activeTab === 'keys' && (
+                  <KeyManagement
+                    keys={keys}
+                    employees={employees}
+                    onAddKey={handleAddKey}
+                    onUpdateKey={handleUpdateKey}
+                    onDeleteKey={handleDeleteKey}
+                    onIssueKey={handleIssueKey}
+                    onReturnKey={handleReturnKey}
+                  />
+                )}
+                {activeTab === 'transactions' && (
+                  <TransactionOverview
+                    transactions={transactions}
+                    employees={employees}
+                    keys={keys}
+                  />
+                )}
+              </>
             )}
           </div>
         </main>

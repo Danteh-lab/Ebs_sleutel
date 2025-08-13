@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Calendar, Activity, User, Key, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Search, Filter, Calendar, Activity, User, Key, ArrowRight, ArrowLeft, Settings } from 'lucide-react';
 import { Transaction, Employee, KeyItem } from '../types';
 
 interface TransactionOverviewProps {
@@ -195,6 +195,12 @@ const TransactionOverview: React.FC<TransactionOverviewProps> = ({
                             <Key className="h-4 w-4" />
                             <span><strong>Sleutel:</strong> {key?.keyNumber || 'Onbekend'} (Type {key?.type})</span>
                           </div>
+                          {transaction.handledBy && (
+                            <div className="flex items-center space-x-2 md:col-span-2">
+                              <Settings className="h-4 w-4" />
+                              <span><strong>Afgehandeld door:</strong> {transaction.handledBy}</span>
+                            </div>
+                          )}
                         </div>
                         
                         {transaction.notes && (

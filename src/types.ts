@@ -24,4 +24,11 @@ export interface Transaction {
   action: 'issue' | 'return';
   timestamp: Date;
   notes?: string;
+  handledBy?: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName: string;
 }
