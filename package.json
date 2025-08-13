@@ -23,10 +23,20 @@
     "directories": {
       "output": "dist-electron"
     },
+    "directories": {
+      "output": "dist-electron"
+    },
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "dist",
+        "to": "dist"
+      }
     ],
     "mac": {
       "category": "public.app-category.business"

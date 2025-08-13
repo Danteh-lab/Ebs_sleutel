@@ -15,7 +15,6 @@ function createWindow() {
       enableRemoteModule: false,
       webSecurity: true,
     },
-    icon: path.join(__dirname, 'assets/icon.png'), // Add your app icon here
     show: false, // Don't show until ready
     titleBarStyle: 'default',
   });
@@ -26,6 +25,7 @@ function createWindow() {
     // Open DevTools in development
     mainWindow.webContents.openDevTools();
   } else {
+    // In production, load the built files
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
@@ -38,6 +38,9 @@ function createWindow() {
   mainWindow.on('closed', () => {
     app.quit();
   });
+
+  // Debug: Log what we're trying to load
+  console.log('Loading from:', isDev ? 'http://localhost:5173' : path.join(__dirname, '../dist/index.html'));
 
   return mainWindow;
 }
