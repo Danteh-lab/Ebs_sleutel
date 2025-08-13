@@ -1,8 +1,12 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "ebs-key-management",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "EBS Key Management System - Een moderne sleutelbeheer applicatie",
+  "author": "EBS",
+  "main": "electron/main.js",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -12,21 +16,6 @@
     "electron:dev": "cross-env NODE_ENV=development npm run electron",
     "electron:build": "npm run build && electron-builder",
     "electron:dist": "npm run build && electron-builder --publish=never"
-  },
-  "main": "electron/main.js",
-  "homepage": "./",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.55.0",
-    "@tauri-apps/api": "^2.7.0",
-    "@tauri-apps/cli": "^2.7.1",
-    "concurrently": "^9.2.0",
-    "cross-env": "^10.0.0",
-    "electron": "^37.2.6",
-    "electron-builder": "^26.0.12",
-    "lucide-react": "^0.344.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "wait-on": "^8.0.4"
   },
   "build": {
     "appId": "com.ebs.keymanagement",
@@ -49,12 +38,23 @@
       "target": "AppImage"
     }
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.55.0",
+    "concurrently": "^9.2.0",
+    "cross-env": "^10.0.0",
+    "electron": "^37.2.6",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "wait-on": "^8.0.4"
+  },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
