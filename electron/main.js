@@ -17,6 +17,7 @@ function createWindow() {
     },
     show: false, // Don't show until ready
     titleBarStyle: 'default',
+    icon: path.join(__dirname, '../dist/vite.svg'), // Add icon
   });
 
   // Load the app
@@ -26,21 +27,34 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   } else {
     // In production, load the built files
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    const indexPath = path.join(__dirname, '../dist/index.html');
+    console.log('Loading index.html from:', indexPath);
+    mainWindow.loadFile(indexPath);
   }
 
   // Show window when ready
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    
+    // Focus the window
+    if (isDev) {
+      mainWindow.focus();
+    }
   });
 
   // Handle window closed
   mainWindow.on('closed', () => {
-    app.quit();
+    // On macOS, keep app running even when all windows are closed
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
   });
 
-  // Debug: Log what we're trying to load
-  console.log('Loading from:', isDev ? 'http://localhost:5173' : path.join(__dirname, '../dist/index.html'));
+  // Handle navigation - prevent external links from opening in Electron
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    require('electron').shell.openExternal(url);
+    return { action: 'deny' };
+  });
 
   return mainWindow;
 }
@@ -110,18 +124,21 @@ function createMenu() {
   Menu.setApplicationMenu(menu);
 }
 
-// App event handlers
+// This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
   createWindow();
   createMenu();
 
   app.on('activate', () => {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
 
+// Quit when all windows are closed, except on macOS
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -134,4 +151,16 @@ app.on('web-contents-created', (event, contents) => {
     event.preventDefault();
     require('electron').shell.openExternal(navigationURL);
   });
+});
+
+// Handle certificate errors
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  if (isDev) {
+    // In development, ignore certificate errors
+    event.preventDefault();
+    callback(true);
+  } else {
+    // In production, use default behavior
+    callback(false);
+  }
 });

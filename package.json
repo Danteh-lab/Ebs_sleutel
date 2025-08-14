@@ -2,7 +2,6 @@
   "name": "ebs-key-management",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
   "description": "EBS Key Management System - Een moderne sleutelbeheer applicatie",
   "author": "EBS",
   "main": "electron/main.js",
