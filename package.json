@@ -4,8 +4,9 @@
   "version": "1.0.0",
   "description": "EBS Key Management System - Een moderne sleutelbeheer applicatie",
   "author": "EBS",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "homepage": "./",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
