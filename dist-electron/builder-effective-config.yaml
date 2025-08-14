@@ -3,19 +3,19 @@ directories:
   buildResources: build
 appId: com.ebs.keymanagement
 productName: EBS Key Management
+compression: store
+nodeGypRebuild: false
 files:
   - filter:
       - dist/**/*
       - electron/**/*
-      - node_modules/**/*
       - package.json
-extraResources:
-  - from: dist
-    to: dist
+extraResources: []
 mac:
   category: public.app-category.business
+  target: dir
 win:
-  target: nsis
+  target: dir
 linux:
-  target: AppImage
+  target: dir
 electronVersion: 37.2.6
