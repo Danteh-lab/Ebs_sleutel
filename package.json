@@ -20,29 +20,26 @@
   "build": {
     "appId": "com.ebs.keymanagement",
     "productName": "EBS Key Management",
+    "compression": "store",
+    "nodeGypRebuild": false,
     "directories": {
       "output": "dist-electron"
     },
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "node_modules/**/*",
       "package.json"
     ],
-    "extraResources": [
-      {
-        "from": "dist",
-        "to": "dist"
-      }
-    ],
+    "extraResources": [],
     "mac": {
-      "category": "public.app-category.business"
+      "category": "public.app-category.business",
+      "target": "dir"
     },
     "win": {
-      "target": "nsis"
+      "target": "dir"
     },
     "linux": {
-      "target": "AppImage"
+      "target": "dir"
     }
   },
   "dependencies": {
