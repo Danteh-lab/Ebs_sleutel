@@ -2,6 +2,11 @@ const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
+// Load environment variables for production
+if (!isDev) {
+  require('dotenv').config({ path: path.join(__dirname, '../.env') });
+}
+
 function createWindow() {
   // Create the browser window
   const mainWindow = new BrowserWindow({
@@ -14,10 +19,12 @@ function createWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       webSecurity: true,
+      // Allow loading of local resources
+      allowRunningInsecureContent: false,
     },
     show: false, // Don't show until ready
     titleBarStyle: 'default',
-    icon: path.join(__dirname, '../dist/vite.svg'), // Add icon
+    icon: path.join(__dirname, '../dist/vite.svg'),
   });
 
   // Load the app
@@ -29,7 +36,23 @@ function createWindow() {
     // In production, load the built files
     const indexPath = path.join(__dirname, '../dist/index.html');
     console.log('Loading index.html from:', indexPath);
-    mainWindow.loadFile(indexPath);
+    
+    // Check if file exists
+    const fs = require('fs');
+    if (fs.existsSync(indexPath)) {
+      console.log('Index file exists, loading...');
+      mainWindow.loadFile(indexPath);
+    } else {
+      console.error('Index file not found at:', indexPath);
+      // Fallback: try to load from resources
+      const resourcePath = path.join(process.resourcesPath, 'dist/index.html');
+      console.log('Trying resource path:', resourcePath);
+      if (fs.existsSync(resourcePath)) {
+        mainWindow.loadFile(resourcePath);
+      } else {
+        console.error('Resource file also not found');
+      }
+    }
   }
 
   // Show window when ready
@@ -40,6 +63,11 @@ function createWindow() {
     if (isDev) {
       mainWindow.focus();
     }
+  });
+
+  // Handle loading errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('Failed to load:', errorCode, errorDescription, validatedURL);
   });
 
   // Handle window closed
