@@ -1,0 +1,21 @@
+directories:
+  output: dist-electron
+  buildResources: build
+appId: com.ebs.keymanagement
+productName: EBS Key Management
+files:
+  - filter:
+      - dist/**/*
+      - electron/**/*
+      - node_modules/**/*
+      - package.json
+extraResources:
+  - from: dist
+    to: dist
+mac:
+  category: public.app-category.business
+win:
+  target: nsis
+linux:
+  target: AppImage
+electronVersion: 37.2.6
